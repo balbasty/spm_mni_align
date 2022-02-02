@@ -21,9 +21,13 @@ PO = spm_select('expand',PO);
 %-Coregister
 %--------------------------------------------------------------------------
 if isfield(job,'eoptions')
+    odir = job.eoptions.dir{1};
     PE = spm_file(PO,'prefix',job.eoptions.prefix);
+    if ~isempty(odir)
+        PE = spm_file(PE, 'path', odir);
+    end
     PE = spm_select('expand',PE);
-    if ~isempty(job.eoptions.prefix)
+    if ~isempty(job.eoptions.prefix) || ~isempty(odir)
         for j=1:numel(PE)
             src = PO{j};
             dst = PE{j};
@@ -51,6 +55,10 @@ end
 if isfield(job,'roptions')
     P            = char(job.ref{:},job.source{:},job.other{:});
     P            = spm_file(P, 'prefix', job.eoptions.prefix);
+    odir = job.eoptions.dir{1};
+    if ~isempty(odir)
+        P        = spm_file(P, 'path', odir);
+    end
     flags.mask   = job.roptions.mask;
     flags.mean   = 0;
     flags.interp = job.roptions.interp;
@@ -65,8 +73,16 @@ end
 %--------------------------------------------------------------------------
 if isfield(job,'eoptions')
     out.cfiles   = spm_file(PO, 'prefix', job.eoptions.prefix);
+    odir = job.eoptions.dir{1};
+    if ~isempty(odir)
+        out.cfiles = spm_file(out.cfiles, 'path', odir);
+    end
     out.M        = M;
 end
 if isfield(job,'roptions')
     out.rfiles   = spm_file(PO, 'prefix', job.roptions.prefix);
+    odir = job.roptions.dir{1};
+    if ~isempty(odir)
+        out.rfiles = spm_file(out.rfiles, 'path', odir);
+    end
 end

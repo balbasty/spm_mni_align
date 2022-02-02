@@ -110,8 +110,20 @@ eprefix.tag     = 'prefix';
 eprefix.name    = 'Filename Prefix';
 eprefix.help    = {'String to be prepended to the filenames of the estimated image file(s). Default prefix is ''e''.'};
 eprefix.strtype = 's';
-eprefix.num     = [1 Inf];
+eprefix.num     = [0 Inf];
 eprefix.val     = {'e'};
+
+%--------------------------------------------------------------------------
+% edir Output directory
+%--------------------------------------------------------------------------
+edir         = cfg_files;
+edir.tag     = 'dir';
+edir.name    = 'Output directory';
+edir.help    = {'Output directory. If unset, same as the input file.'};
+edir.filter  = 'dir';
+edir.ufilter = '.*';
+edir.num     = [0 1];
+edir.val     = {{''}};
 
 %--------------------------------------------------------------------------
 % eoptions Estimation Options
@@ -119,7 +131,7 @@ eprefix.val     = {'e'};
 eoptions         = cfg_branch;
 eoptions.tag     = 'eoptions';
 eoptions.name    = 'Estimation Options';
-eoptions.val     = {rigid sep fwhm eprefix};
+eoptions.val     = {rigid sep fwhm eprefix edir};
 eoptions.help    = {'Various registration options.'};
 
 %--------------------------------------------------------------------------
@@ -240,12 +252,24 @@ prefix.num     = [1 Inf];
 prefix.def     = @(val)spm_get_defaults('coreg.write.prefix', val{:});
 
 %--------------------------------------------------------------------------
+% rdir Output directory
+%--------------------------------------------------------------------------
+rdir         = cfg_files;
+rdir.tag     = 'dir';
+rdir.name    = 'Output directory';
+rdir.help    = {'Output directory. If unset, same as the input file.'};
+rdir.filter  = 'dir';
+rdir.ufilter = '.*';
+rdir.num     = [0 1];
+rdir.val     = {''};
+
+%--------------------------------------------------------------------------
 % roptions Reslice Options
 %--------------------------------------------------------------------------
 roptions         = cfg_branch;
 roptions.tag     = 'roptions';
 roptions.name    = 'Reslice Options';
-roptions.val     = {interp wrap mask prefix};
+roptions.val     = {interp wrap mask prefix rdir};
 roptions.help    = {'Various reslicing options.'};
 
 %--------------------------------------------------------------------------
