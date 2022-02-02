@@ -56,6 +56,23 @@ other.num     = [0 Inf];
 other.preview = @(f) spm_check_registration(char(f));
 
 %--------------------------------------------------------------------------
+% reorient Reorient
+%--------------------------------------------------------------------------
+reorient         = cfg_menu;
+reorient.tag     = 'reorient';
+reorient.name    = 'Reorient';
+reorient.help    = {
+    'Whether to find the correct orientation of the image. '
+    'Otherwise, trust the input header.'
+    }';
+reorient.labels  = {
+                'No'
+                'Yes'
+}';
+reorient.values  = {0 1};
+reorient.val     = {0};
+
+%--------------------------------------------------------------------------
 % rig Rigid
 %--------------------------------------------------------------------------
 rigid         = cfg_menu;
@@ -131,7 +148,7 @@ edir.val     = {{''}};
 eoptions         = cfg_branch;
 eoptions.tag     = 'eoptions';
 eoptions.name    = 'Estimation Options';
-eoptions.val     = {rigid sep fwhm eprefix edir};
+eoptions.val     = {reorient rigid sep fwhm eprefix edir};
 eoptions.help    = {'Various registration options.'};
 
 %--------------------------------------------------------------------------
@@ -304,7 +321,7 @@ source.preview = @(f) spm_image('Display',char(f));
 estwrite      = cfg_exbranch;
 estwrite.tag  = 'estwrite';
 estwrite.name = 'MNI Align: Estimate & Reslice';
-estwrite.val  = {ref source other eoptions roptions};
+estwrite.val  = {source other ref eoptions roptions};
 estwrite.help = {
     'Within-subject registration using a rigid-body model and image reslicing.'
     ''

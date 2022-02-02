@@ -35,7 +35,7 @@ if isfield(job,'eoptions')
             src = strjoin(src(1:end-1), ',');
             dst = strsplit(dst, ',');
             dst = strjoin(dst(1:end-1), ',');
-            spm_copy(src, dst, 'nifti', true);
+            mni_copyfile(src, dst, 'nifti', true);
         end
     end
     

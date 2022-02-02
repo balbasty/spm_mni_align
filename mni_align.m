@@ -24,40 +24,64 @@ if numel(sep) > 1
     sep = sep(2:end);
 end
 
-% Do the affine registration
 V = spm_vol(S);
-
-M               = V(1).mat;
-c               = (V(1).dim+1)/2;
-V(1).mat(1:3,4) = -M(1:3,1:3)*c(:);
-[Affine1,ll1]   = spm_maff8(V(1),sep0,fwhm0,tpm,[],'mni'); % Closer to rigid
-Affine1         = Affine1*(V(1).mat/M);
+M = V(1).mat;
+c = (V(1).dim+1)/2;
 
 % Run using the origin from the header
-V(1).mat      = M;
-[Affine2,ll2] = spm_maff8(V(1),sep0,fwhm0,tpm,[],'mni'); % Closer to rigid
+V(1).mat    = M;
+[Affine,ll] = spm_maff8(V(1),sep0,fwhm0,tpm,[],'mni');
 
-% Pick the result with the best fit
-if ll1>ll2, Affine  = Affine1; else Affine  = Affine2; end
+if opt.reorient
+    % Try all possible orientations
+    for perm=perms(1:3)'
+    for flip=combvec([0 1], [0 1], [0 1])
+        P = eye(4);
+        P = P .* [(1-2*flip); 1];           % flip
+        P = P([perm; 4],:);                 % permute
+        MM = P * M;
+        MM(1:3,4) = -MM(1:3,1:3) * c(:);    % center
 
+        V(1).mat = MM;
+        [Affine1,ll1]   = spm_maff8(V(1),sep0,fwhm0,tpm,[],'mni');
+        Affine1         = Affine1*(V(1).mat/M);
+        if ll1 > ll
+            ll = ll1;
+            Affine = Affine1;
+        end
+    end
+    end
+else
+    % Run using the origin at the center of the FOV
+    V(1).mat        = M;
+    V(1).mat(1:3,4) = -M(1:3,1:3)*c(:);
+    [Affine1,ll1]   = spm_maff8(V(1),sep0,fwhm0,tpm,[],'mni');
+    Affine1         = Affine1*(V(1).mat/M);
+    if ll1 > ll
+        ll = ll1;
+        Affine = Affine1;
+    end
+    
+end
+
+% Fine tune
 for i=1:numel(fwhm)
 for j=1:numel(sep)
     Affine = spm_maff8(S,sep(j),fwhm(i),tpm,Affine,'mni');
 end
 end
 
-
 % Generate mm coordinates of where deformations map from
-x      = affind(rgrid(size(tpm.dat{1})),tpm.M);
+x = affind(rgrid(size(tpm.dat{1})),tpm.M);
 
 % Generate mm coordinates of where deformation maps to
-y1     = affind(x,inv(Affine));
+y = affind(x,inv(Affine));
 
 % Weight the transform via GM+WM
-weight = single(exp(tpm.dat{1})+exp(tpm.dat{2}));
+w = single(exp(tpm.dat{1})+exp(tpm.dat{2}));
 
 % Weighted Procrustes analysis
-[Affine,R]  = spm_get_closest_affine(x,y1,weight);
+[Affine,R] = spm_get_closest_affine(x,y,w);
 
 if opt.rigid
     M = R;
