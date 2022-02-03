@@ -4,6 +4,9 @@ function mni_copyfile(source, dest, varargin)
 %__________________________________________________________________________
 % Copyright (C) 2017-2018 Wellcome Trust Centre for Neuroimaging
 
+% 2022 Yael Balbastre
+% Modified from `spm_copy`
+
 % Guillaume Flandin
 % $Id: spm_copy.m 7744 2019-12-03 12:38:47Z guillaume $
 

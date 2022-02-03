@@ -7,9 +7,10 @@ function M = mni_align(T, S, opt)
 % M   - Affine matrix
 %__________________________________________________________________________
 % Copyright (C) 2008-2015 Wellcome Trust Centre for Neuroimaging
-% Copyright (C) 2018 Mikael Brudfors
-% Copyright (C) 2021 Yael Balbastre
 
+% 2018 Mikael Brudfors
+% 2022 Yael Balbastre
+%
 % Copied from Mikael Brudfors' `realign2mni`, which is itself mostly copied
 % from `spm_preproc8`
 
@@ -32,42 +33,45 @@ c = (V(1).dim+1)/2;
 V(1).mat    = M;
 [Affine,ll] = spm_maff8(V(1),sep0,fwhm0,tpm,[],'mni');
 
+P = eye(4);
 if opt.reorient
     % Try all possible orientations
     for perm=perms(1:3)'
     for flip=combvec([0 1], [0 1], [0 1])
-        P = eye(4);
-        P = P .* [(1-2*flip); 1];           % flip
-        P = P([perm; 4],:);                 % permute
-        MM = P * M;
-        MM(1:3,4) = -MM(1:3,1:3) * c(:);    % center
-
-        V(1).mat = MM;
-        [Affine1,ll1]   = spm_maff8(V(1),sep0,fwhm0,tpm,[],'mni');
-        Affine1         = Affine1*(V(1).mat/M);
+        P1            = eye(4);
+        P1            = P1 .* [(1-2*flip); 1];           % flip
+        P1            = P1([perm; 4],:);                 % permute
+        M1            = P1 * M;
+        M1(1:3,4)     = -M1(1:3,1:3) * c(:);             % center
+        P1            = M1/M;
+        V(1).mat      = M1;
+        [Affine1,ll1] = spm_maff8(V(1),sep0,fwhm0,tpm,[],'mni');
         if ll1 > ll
-            ll = ll1;
+            ll     = ll1;
             Affine = Affine1;
+            P      = P1;
         end
     end
     end
 else
     % Run using the origin at the center of the FOV
-    V(1).mat        = M;
-    V(1).mat(1:3,4) = -M(1:3,1:3)*c(:);
-    [Affine1,ll1]   = spm_maff8(V(1),sep0,fwhm0,tpm,[],'mni');
-    Affine1         = Affine1*(V(1).mat/M);
+    M1            = M;
+    M1(1:3,4)     = -M1(1:3,1:3)*c(:);
+    P1            = M1/M;
+    V(1).mat      = M1;
+    [Affine1,ll1] = spm_maff8(V(1),sep0,fwhm0,tpm,[],'mni');
     if ll1 > ll
-        ll = ll1;
+        ll     = ll1;
         Affine = Affine1;
+        P      = P1;
     end
-    
 end
 
 % Fine tune
+V(1).mat = P * M;
 for i=1:numel(fwhm)
 for j=1:numel(sep)
-    Affine = spm_maff8(S,sep(j),fwhm(i),tpm,Affine,'mni');
+    Affine = spm_maff8(V(1),sep(j),fwhm(i),tpm,Affine,'mni');
 end
 end
 
@@ -83,11 +87,17 @@ w = single(exp(tpm.dat{1})+exp(tpm.dat{2}));
 % Weighted Procrustes analysis
 [Affine,R] = spm_get_closest_affine(x,y,w);
 
+fprintf('affine:\n');
+inv(Affine)
+
 if opt.rigid
     M = R;
 else
     M = Affine;
 end
+
+% Apply permutation
+M = P \ M;
 
 %==========================================================================
 

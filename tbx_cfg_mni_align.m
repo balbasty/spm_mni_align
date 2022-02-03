@@ -2,8 +2,9 @@ function align = tbx_cfg_mni_align
 % SPM Configuration file for MNI-alignment
 %__________________________________________________________________________
 % Copyright (C) 2005-2016 Wellcome Trust Centre for Neuroimaging
-% Copyright (C) 2021 Yael Balbastre
 
+% 2022 Yael Balbastre
+%
 % Modified from `spm_cfg_coreg`
 % $Id: spm_cfg_coreg.m 7665 2019-09-23 11:27:40Z john $
 

@@ -8,8 +8,9 @@ function out = run_mni_align(job)
 % out    - computation results, usually a struct variable.
 %__________________________________________________________________________
 % Copyright (C) 2005-2014 Wellcome Trust Centre for Neuroimaging
-% Copyright (C) 2021 Yael Balbastre
 
+% 2022 Yael Balbastre
+%
 % Modified from `spm_run_coreg`
 % $Id: spm_run_coreg.m 5956 2014-04-16 14:34:25Z guillaume $
 
